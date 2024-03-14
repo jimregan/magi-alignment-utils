@@ -21,6 +21,7 @@ import whisper
 from string import punctuation
 import librosa
 import soundfile as sf
+import re
 
 
 _HELP_MSG = """
@@ -49,6 +50,11 @@ def clean_sentence(text):
 
 def fix_nonwords(text):
     words = []
+    matcher = r'(\[[^\]]+\])'
+    for match in re.findall(matcher, text):
+        replacement = match.replace(" ", "_")
+        text = text.replace(match, replacement)
+    text = text.strip()
     for word in text.split(" "):
         if word.startswith("[") and word.endswith("]"):
             words.append("[bracketed]")
@@ -89,7 +95,6 @@ def main():
         samples, sr = librosa.load(str(wav_file))
         samples = librosa.resample(samples, orig_sr=sr, target_sr=16000)
         if wav_file.parent != indir.name:
-            print(wav_file.parent, indir.name)
             parent = str(wav_file.parent)
             if str(indir.name) + "/" in parent:
                 parent = parent.replace(indir.name + "/", "")
