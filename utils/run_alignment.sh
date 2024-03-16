@@ -93,7 +93,13 @@ do
         do
             spk=spk$(echo $wavfile|awk -F'/' '{print $(NF-1)}')
             outwav=$(echo $wavfile|awk -F/ '{print $NF}')
-            ffmpeg -i $wavfile -c:a pcm_s24le -ar 44100 "$2"/wav/${spk}_$outwav
+            # get the name of the tsv file
+            tsvfile=$(echo "$2/wav/${spk}_$outwav" | sed -e 's/wav/tsv/g')
+            # only convert if the tsv file exists
+            if [ -e $tsvfile ]
+            then
+                ffmpeg -i $wavfile -c:a pcm_s24le -ar 44100 "$2"/wav/${spk}_$outwav
+            fi
         done
     fi
 done
